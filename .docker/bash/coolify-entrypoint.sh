@@ -6,6 +6,15 @@
 chown -R www-data:www-data /var/www/uvdesk/var /var/www/uvdesk/public
 
 # Handle persistent .env
+# STRATEGY: Configuration as Code via UV_ENV_FILE_CONTENT
+if [ ! -z "$UV_ENV_FILE_CONTENT" ]; then
+    echo "Found UV_ENV_FILE_CONTENT environment variable. Overwriting persistent .env file."
+    echo "$UV_ENV_FILE_CONTENT" > /data/uvdesk-config/.env
+    chown www-data:www-data /data/uvdesk-config/.env
+    chmod 666 /data/uvdesk-config/.env
+fi
+
+# Fallback: Initialize if missing or empty
 if [ ! -f /data/uvdesk-config/.env ] || [ ! -s /data/uvdesk-config/.env ]; then
     echo "Initializing persistent .env from image default (file missing or empty)"
     if [ -f /var/www/uvdesk/.env ]; then
@@ -14,10 +23,11 @@ if [ ! -f /data/uvdesk-config/.env ] || [ ! -s /data/uvdesk-config/.env ]; then
         touch /data/uvdesk-config/.env
     fi
     chown www-data:www-data /data/uvdesk-config/.env
+    chmod 666 /data/uvdesk-config/.env
 fi
 
-# Force APP_ENV=prod and APP_DEBUG=0 in persistent .env if it exists
-if [ -f /data/uvdesk-config/.env ]; then
+# Force APP_ENV=prod and APP_DEBUG=0 in persistent .env if it exists AND env var is not set (to avoid overwriting user provided config)
+if [ -f /data/uvdesk-config/.env ] && [ -z "$UV_ENV_FILE_CONTENT" ]; then
     sed -i 's/APP_ENV=dev/APP_ENV=prod/g' /data/uvdesk-config/.env
     sed -i 's/APP_DEBUG=1/APP_DEBUG=0/g' /data/uvdesk-config/.env
 fi
