@@ -19,7 +19,7 @@ services:
     volumes:
       - app_data:/var/www/uvdesk/var
       - public_data:/var/www/uvdesk/public/assets
-      - env_file:/var/www/uvdesk/.env
+      - env_file:/data/uvdesk-config
     networks:
       - coolify
 

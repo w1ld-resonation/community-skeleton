@@ -1,11 +1,24 @@
 #!/bin/bash
 set -e
-
 # Fix permissions if needed
 chown -R www-data:www-data /var/www/uvdesk/var /var/www/uvdesk/public
-if [ -f /var/www/uvdesk/.env ]; then
-    chown www-data:www-data /var/www/uvdesk/.env
+
+# Handle persistent .env
+if [ ! -f /data/uvdesk-config/.env ]; then
+    echo "Creating empty .env in persistent storage"
+    touch /data/uvdesk-config/.env
+    chown www-data:www-data /data/uvdesk-config/.env
 fi
+
+# Link the app .env to the persistent one
+if [ ! -L /var/www/uvdesk/.env ]; then
+    echo "Linking .env to persistent storage"
+    rm -f /var/www/uvdesk/.env
+    ln -s /data/uvdesk-config/.env /var/www/uvdesk/.env
+fi
+
+# Ensure web server can write to it
+chown -h www-data:www-data /var/www/uvdesk/.env
 
 # Create database if not exists (using UVDesk console if available or doctrine)
 # We use || true to avoid failure if DB already exists or connection fails temporarily (though we want it to work)

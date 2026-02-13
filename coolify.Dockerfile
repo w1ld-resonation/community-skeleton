@@ -56,6 +56,9 @@ RUN chown -R www-data:www-data /var/www/uvdesk
 # Configure Apache VHost
 COPY .docker/config/apache2/vhost.conf /etc/apache2/sites-available/000-default.conf
 
+# Create directory for persistent config
+RUN mkdir -p /data/uvdesk-config && chown -R www-data:www-data /data/uvdesk-config
+
 COPY .docker/bash/coolify-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/coolify-entrypoint.sh
 
