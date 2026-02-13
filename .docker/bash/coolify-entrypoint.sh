@@ -13,12 +13,14 @@ fi
 # Link the app .env to the persistent one
 if [ ! -L /var/www/uvdesk/.env ]; then
     echo "Linking .env to persistent storage"
-    rm -f /var/www/uvdesk/.env
+    # Force remove .env whether it is a file or a directory
+    rm -rf /var/www/uvdesk/.env
     ln -s /data/uvdesk-config/.env /var/www/uvdesk/.env
 fi
 
 # Ensure web server can write to it
 chown -h www-data:www-data /var/www/uvdesk/.env
+chown www-data:www-data /data/uvdesk-config/.env
 
 # Create database if not exists (using UVDesk console if available or doctrine)
 # We use || true to avoid failure if DB already exists or connection fails temporarily (though we want it to work)
